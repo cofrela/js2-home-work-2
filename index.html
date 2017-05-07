@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $("#birth").datepicker({
+            monthNames:["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"],
+            dayNamesMin:["Вс","Пн","Вт","Ср","Чт","Пт","Сб"],
+            firstDay:1,
+            dateFormat:"yy-mm-dd"
+        });
+    });  
+</script>
+</head>
+
+<body>
+        <form action="form.php" method="post">
+            <label for="username">Ваше имя:</label><span id="username_text"></span>
+            <br>
+            <input id="username" class="form-control" type="text" name="username" placeholder="username">
+            <br>
+            <br>
+            <label for="password">Пароль:</label><span id="password_text"></span>
+            <br>
+            <input id="password" class="form-control" type="text" name="userpassword" placeholder="password">
+            <br>
+            <br>
+            <label for="email">Ваш Email:</label><span id="email_text"></span>
+            <br>
+            <input id="email" class="form-control" type="email" name="useremail" placeholder="email">
+            <br>
+            <br>
+            <label for="gender">Пол:</label><span id="gender_text"></span>
+            <br>
+            <select id="gender" class="form-control">
+                <option>M</option>
+                <option>Ж</option>
+            </select>
+            <br>
+            <br>
+            <label for="credit_card">Кредитная карта:</label><span id="credit_card_text"></span>
+            <br>
+            <input id="credit_card" class="form-control" name="usercreditcard" placeholder="creditcard">
+            <br>
+            <br>
+            <label for="bio">Биография:</label><span id="bio_text"></span>
+            <br>
+            <textarea id="bio" class="form-control" type="text" name="userbio" placeholder="bio"></textarea>
+            <br>
+            <br>
+            <label for="birth">Дата рождения:</label><span id="birth_text"></span>
+            <br>
+            <input id="birth" class="form-control" type="text">
+            <br>
+            <br>  
+            <input type="button" value="Отправить" onclick="sendRequest()">
+        </form>   
+            
+<script>
+    function getXmlHttp() {
+        var xmlhttp;
+    if (window.XMLHttpRequest) {
+        xmlhttp = new XMLHttpRequest()
+    } else {
+        xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+    }
+        return xmlhttp;
+    }
+    
+    var xmlhttp = getXmlHttp(); //Создаём объект XMLHTTP
+    
+    function sendRequest() {
+        xmlhttp.open('POST', 'validator.php', true); //Открываем асинхронное соединение
+        xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); // Отправляем кодировку
+        //Сбор данных из формы
+        var fields = document.getElementsByClassName('form-control'); 
+        var fieldsArray = Array.prototype.slice.call(fields, 0);
+        var formData = fieldsArray.map(function(item) {
+            return item.id + "=" + item.value;
+        }).join('&');
+        xmlhttp.send(formData); //Отправляем POST-запрос
+        xmlhttp.onreadystatechange = function() {  //Ждём ответа от сервера
+            if (xmlhttp.readyState == 4) { // Ответ пришёл
+                if(xmlhttp.status == 200) { // Сервер вернул код 200
+                var response = JSON.parse(xmlhttp.responseText);
+                    if (!response.result) {
+                        response.error.forEach(function(key, item) {
+                            var correctKey = key.toLowerCase().replace(' ', '_');
+                            document.getElementById(correctKey + '_text').innerHTML = item;
+                        });
+                    }
+                } 
+            }
+        }
+    }    
+</script>
+
+</body>
+</html>
